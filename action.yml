@@ -60,7 +60,7 @@ runs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        git remote add azure https://$AZURE_DEVOPS_PAT@$ORG_URL/$PROJECT/_git/$REPO_NAME || true
+        git remote add azure $AZURE_DEVOPS_PAT@$ORG_URL/$PROJECT/_git/$REPO_NAME || true
         git push azure --all --force
         git push azure --tags --force
 
