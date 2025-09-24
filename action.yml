@@ -9,9 +9,6 @@ inputs:
   organization:
     description: "Azure DevOps URL & organization name (e.g., https://dev.azure.com/myorg)"
     required: true
-  pat:
-    description: "Azure DevOps Personal Access Token (with Project and Code permissions)"
-    required: true
 
 runs:
   using: "composite"
