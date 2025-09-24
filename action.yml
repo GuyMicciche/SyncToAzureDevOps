@@ -7,7 +7,7 @@ branding:
 
 inputs:
   organization:
-    description: "Azure DevOps URL & organization name (e.g., dev.azure.com/myorg or myorg.visualstudio.com)"
+    description: "Azure DevOps organization name (e.g., dev.azure.com/myorg or myorg.visualstudio.com). Do NOT include https://"
     required: true
   pat:
     description: "Azure DevOps Personal Access Token with Build (Read & Execute), Code (Read/Write/Manage), and Project/Team (Read/Write/Manage) permissions"
@@ -21,20 +21,10 @@ runs:
       run: |
         az extension add --name azure-devops --upgrade --yes
 
-    - name: Login to Azure DevOps
-      shell: bash
-      env:
-        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
-      run: |
-        ORG_URL="https://${{ inputs.organization }}"
-
-        echo "Logging in to Azure DevOps..."
-        echo $AZURE_DEVOPS_PAT | az devops login --organization $ORG_URL
-
     - name: Create Project and Repository if Needed
       shell: bash
       env:
-        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
       run: |
         ORG_URL="https://${{ inputs.organization }}"
         PROJECT="${{ github.event.repository.name }}"
@@ -63,14 +53,14 @@ runs:
       env:
         AZURE_DEVOPS_PAT: ${{ inputs.pat }}
       run: |
-        ORG_URL="${{ inputs.organization }}"
+        ORG_URL="https://${{ inputs.organization }}"
         PROJECT="${{ github.event.repository.name }}"
         REPO_NAME="${{ github.event.repository.name }}"
 
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        git remote add azure https://actions:${AZURE_DEVOPS_PAT}@$ORG_URL/$PROJECT/_git/$REPO_NAME || true
+        git remote add azure https://$AZURE_DEVOPS_PAT@${ORG_URL#https://}/$PROJECT/_git/$REPO_NAME || true
         git push azure --all --force
         git push azure --tags --force
 
