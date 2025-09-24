@@ -21,6 +21,16 @@ runs:
       run: |
         az extension add --name azure-devops --upgrade --yes
 
+    - name: Login to Azure DevOps
+      shell: bash
+      env:
+        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
+      run: |
+        ORG_URL="https://${{ inputs.organization }}"
+
+        echo "Logging in to Azure DevOps..."
+        echo $AZURE_DEVOPS_PAT | az devops login --organization $ORG_URL
+
     - name: Create Project and Repository if Needed
       shell: bash
       env:
