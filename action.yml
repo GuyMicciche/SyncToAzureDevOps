@@ -7,7 +7,7 @@ branding:
 
 inputs:
   organization:
-    description: "Azure DevOps URL & organization name (e.g., https://dev.azure.com/myorg)"
+    description: "Azure DevOps URL & organization name (e.g., dev.azure.com/myorg or myorg.visualstudio.com)"
     required: true
   pat:
     description: "Azure DevOps Personal Access Token with Build (Read & Execute), Code (Read/Write/Manage), and Project/Team (Read/Write/Manage) permissions"
