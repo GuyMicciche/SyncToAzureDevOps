@@ -21,7 +21,7 @@ runs:
     - name: Create Project and Repository if Needed
       shell: bash
       env:
-        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
       run: |
         ORG_URL="${{ inputs.organization }}"
         PROJECT="${{ github.event.repository.name }}"
