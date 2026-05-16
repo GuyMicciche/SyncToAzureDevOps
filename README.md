@@ -87,24 +87,32 @@ Bidirectional sync between GitHub and Azure DevOps — mirror a single repo or y
 3. Set the organization and select the scopes from the table above
 4. Copy the token immediately — it is only shown once
 
-### 2. Add secrets to GitHub
+### 2. Create GitHub Personal Access Token (azure-to-github only)
+
+1. Go to **github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token**
+2. Name it `Azure DevOps Backup`
+3. Check the `repo` scope
+4. Click **Generate token**
+5. Copy the token immediately — it is only shown once
+
+### 3. Add secrets to GitHub
 
 For GitHub to Azure sync:
 
 ```
 Repo > Settings > Secrets and variables > Actions > New secret
 Name:  AZURE_DEVOPS_PAT
-Value: [your Azure DevOps PAT]
+Value: [Azure DevOps PAT (GitHub Sync Action value from Step 1)]
 ```
 
 For Azure to GitHub sync, add a second secret:
 
 ```
 Name:  GH_BACKUP_TOKEN
-Value: [GitHub personal access token with repo scope]
+Value: [GitHub personal access token (Azure DevOps Backup value from Step 2)]
 ```
 
-### 3. Add a workflow
+### 4. Add a workflow
 
 See the examples below for common configurations.
 
