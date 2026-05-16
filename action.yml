@@ -39,7 +39,7 @@ runs:
       if: ${{ inputs.direction == 'github-to-azure' && inputs.sync-mode == 'single' }}
       shell: bash
       env:
-        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
       run: |
         ORG_URL="https://${{ inputs.organization }}"
         PROJECT="${{ github.event.repository.name }}"
@@ -63,7 +63,7 @@ runs:
 
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
-        git remote add azure "https://${AZURE_DEVOPS_EXT_PAT}@${{ inputs.organization }}/$PROJECT/_git/$REPO_NAME" || true
+        git remote add azure "https://${AZURE_DEVOPS_PAT}@${{ inputs.organization }}/$PROJECT/_git/$REPO_NAME" || true
         git push azure --all --force
         git push azure --tags --force
         echo "✅ Synced $REPO_NAME to Azure DevOps"
@@ -72,7 +72,7 @@ runs:
       if: ${{ inputs.direction == 'azure-to-github' && inputs.sync-mode == 'single' }}
       shell: bash
       env:
-        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: |
@@ -101,7 +101,7 @@ runs:
       if: ${{ inputs.direction == 'azure-to-github' && inputs.sync-mode == 'org-wide' }}
       shell: bash
       env:
-        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: |
