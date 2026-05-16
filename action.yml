@@ -1,5 +1,5 @@
 name: "Sync to Azure DevOps"
-description: "Automatically create/update an Azure DevOps project & repo, then sync a GitHub repo to it."
+description: "Bidirectional sync between GitHub and Azure DevOps. Supports single-repo or entire org mirroring."
 author: "GuyMicciche"
 branding:
   icon: "git-merge"
@@ -7,11 +7,25 @@ branding:
 
 inputs:
   organization:
-    description: "Azure DevOps organization name (e.g., dev.azure.com/myorg or myorg.visualstudio.com). Do NOT include https://"
+    description: "Azure DevOps org (e.g. dev.azure.com/myorg or myorg.visualstudio.com). Do NOT include https://"
     required: true
   pat:
-    description: "Azure DevOps Personal Access Token with Build (Read & Execute), Code (Read/Write/Manage), and Project/Team (Read/Write/Manage) permissions"
+    description: "Azure DevOps Personal Access Token (PAT) with Build (Read & Execute), Code (Read/Write/Manage), Project/Team (Read/Write/Manage) permissions"
     required: true
+  direction:
+    description: "'github-to-azure' (default) or 'azure-to-github'"
+    required: false
+    default: "github-to-azure"
+  sync-mode:
+    description: "'single' syncs the current repo only. 'org-wide' iterates all repos in the Azure DevOps org"
+    required: false
+    default: "single"
+  github-token:
+    description: "GitHub token with repo write access. Required when direction is 'azure-to-github'"
+    required: false
+  github-org:
+    description: "GitHub org or user to push repos into when using org-wide + azure-to-github mode"
+    required: false
 
 runs:
   using: "composite"
@@ -21,7 +35,8 @@ runs:
       run: |
         az extension add --name azure-devops --upgrade --yes
 
-    - name: Create Project and Repository if Needed
+    - name: GitHub to Azure (single)
+      if: ${{ inputs.direction == 'github-to-azure' && inputs.sync-mode == 'single' }}
       shell: bash
       env:
         AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
@@ -35,7 +50,6 @@ runs:
         if ! az devops project show --project "$PROJECT" >/dev/null 2>&1; then
           echo "🚀 Creating project: $PROJECT"
           az devops project create --name "$PROJECT" --organization $ORG_URL
-          echo "✅ Project created: $PROJECT"
         else
           echo "ℹ️ Project $PROJECT already exists"
         fi
@@ -43,25 +57,94 @@ runs:
         if ! az repos show --repository "$REPO_NAME" >/dev/null 2>&1; then
           echo "🚀 Creating repository: $REPO_NAME"
           az repos create --name "$REPO_NAME"
-          echo "✅ Repository created: $REPO_NAME"
         else
           echo "ℹ️ Repository $REPO_NAME already exists"
         fi
 
-    - name: Sync to Azure DevOps
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git remote add azure "https://${AZURE_DEVOPS_EXT_PAT}@${{ inputs.organization }}/$PROJECT/_git/$REPO_NAME" || true
+        git push azure --all --force
+        git push azure --tags --force
+        echo "✅ Synced $REPO_NAME to Azure DevOps"
+
+    - name: Azure to GitHub (single)
+      if: ${{ inputs.direction == 'azure-to-github' && inputs.sync-mode == 'single' }}
       shell: bash
       env:
-        AZURE_DEVOPS_PAT: ${{ inputs.pat }}
+        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: |
-        ORG_URL="${{ inputs.organization }}"
+        ORG_URL="https://${{ inputs.organization }}"
         PROJECT="${{ github.event.repository.name }}"
         REPO_NAME="${{ github.event.repository.name }}"
+        GH_ORG="${{ inputs.github-org || github.repository_owner }}"
+
+        az devops configure --defaults organization=$ORG_URL project=$PROJECT
+
+        CLONE_URL="https://${{ inputs.pat }}@${{ inputs.organization }}/$PROJECT/_git/$REPO_NAME"
+        git clone --mirror "$CLONE_URL" repo-mirror
+        cd repo-mirror
 
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        git remote add azure https://$AZURE_DEVOPS_PAT@$ORG_URL/$PROJECT/_git/$REPO_NAME || true
-        git push azure --all --force
-        git push azure --tags --force
+        gh repo create "$GH_ORG/$REPO_NAME" --private || true
 
-        echo "✅ Synced $REPO_NAME to Azure DevOps"
+        GITHUB_REMOTE="https://${GITHUB_TOKEN}@github.com/$GH_ORG/$REPO_NAME.git"
+        git remote add github "$GITHUB_REMOTE" || true
+        git push github --mirror --force
+        echo "✅ Synced $REPO_NAME from Azure DevOps to GitHub"
+
+    - name: Azure to GitHub (org-wide)
+      if: ${{ inputs.direction == 'azure-to-github' && inputs.sync-mode == 'org-wide' }}
+      shell: bash
+      env:
+        AZURE_DEVOPS_EXT_PAT: ${{ inputs.pat }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        ORG_URL="https://${{ inputs.organization }}"
+        GH_ORG="${{ inputs.github-org || github.repository_owner }}"
+
+        az devops configure --defaults organization=$ORG_URL
+
+        PROJECTS=$(az devops project list --org $ORG_URL --query "value[].name" -o tsv)
+
+        for PROJECT in $PROJECTS; do
+          echo "--- Project: $PROJECT ---"
+          az devops configure --defaults organization=$ORG_URL project="$PROJECT"
+
+          REPOS=$(az repos list --query "[].name" -o tsv 2>/dev/null || true)
+          if [ -z "$REPOS" ]; then
+            echo "ℹ️ No repos in $PROJECT, skipping"
+            continue
+          fi
+
+          for REPO_NAME in $REPOS; do
+            echo "  Syncing: $PROJECT/$REPO_NAME"
+            CLONE_URL="https://${{ inputs.pat }}@${{ inputs.organization }}/$PROJECT/_git/$REPO_NAME"
+
+            if ! git ls-remote "$CLONE_URL" HEAD 2>/dev/null | grep -q HEAD; then
+              echo "  ℹ️ Skipping empty repo: $REPO_NAME"
+              continue
+            fi
+
+            git clone --mirror "$CLONE_URL" "mirror-$REPO_NAME"
+            cd "mirror-$REPO_NAME"
+
+            GH_REPO_NAME="${PROJECT}--${REPO_NAME}"
+            gh repo create "$GH_ORG/$GH_REPO_NAME" --private || true
+
+            GITHUB_REMOTE="https://${GITHUB_TOKEN}@github.com/$GH_ORG/$GH_REPO_NAME.git"
+            git remote add github "$GITHUB_REMOTE" || true
+            git push github --mirror --force
+
+            cd ..
+            rm -rf "mirror-$REPO_NAME"
+            echo "  ✅ Done: $GH_REPO_NAME"
+          done
+        done
+
+        echo "✅ Org-wide sync complete"
