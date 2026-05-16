@@ -215,4 +215,5 @@ jobs:
 
 ---
 
-**Star this repo** if it helps your workflow. **Watch** for updates.
+⭐ **Star this repo** if it helps your workflow.
+🔔 **Watch** for updates.
