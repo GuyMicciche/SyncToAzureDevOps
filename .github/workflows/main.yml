@@ -1,0 +1,19 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync to Azure DevOps
+        uses: GuyMicciche/SyncToAzureDevOps@main
+        with:
+          organization: "dev.azure.com/guymicciche/"
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
