@@ -16,7 +16,7 @@ Bidirectional sync between GitHub and Azure DevOps — mirror a single repo or y
   uses: GuyMicciche/SyncToAzureDevOps@v2.0.0
   with:
     organization: "dev.azure.com/yourorganization"
-    pat: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+    pat: ${{ secrets.AZURE_DEVOPS_PAT }}
 ```
 
 ### Azure DevOps to GitHub (business continuity / DR backup)
@@ -26,7 +26,7 @@ Bidirectional sync between GitHub and Azure DevOps — mirror a single repo or y
   uses: GuyMicciche/SyncToAzureDevOps@v2.0.0
   with:
     organization: "dev.azure.com/yourorganization"
-    pat: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+    pat: ${{ secrets.AZURE_DEVOPS_PAT }}
     direction: "azure-to-github"
     sync-mode: "org-wide"
     github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -93,7 +93,7 @@ For GitHub to Azure sync:
 
 ```
 Repo > Settings > Secrets and variables > Actions > New secret
-Name:  AZURE_DEVOPS_EXT_PAT
+Name:  AZURE_DEVOPS_PAT
 Value: [your Azure DevOps PAT]
 ```
 
@@ -131,7 +131,7 @@ jobs:
       - uses: GuyMicciche/SyncToAzureDevOps@v2.0.0
         with:
           organization: "dev.azure.com/yourorganization"
-          pat: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
 ```
 
 ### Nightly business continuity backup (Azure to GitHub, org-wide)
@@ -155,7 +155,7 @@ jobs:
       - uses: GuyMicciche/SyncToAzureDevOps@v2.0.0
         with:
           organization: "dev.azure.com/yourorganization"
-          pat: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
           direction: "azure-to-github"
           sync-mode: "org-wide"
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -184,7 +184,7 @@ jobs:
       - uses: GuyMicciche/SyncToAzureDevOps@v2.0.0
         with:
           organization: "dev.azure.com/mycompany"
-          pat: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          pat: ${{ secrets.AZURE_DEVOPS_PAT }}
 ```
 
 ---
