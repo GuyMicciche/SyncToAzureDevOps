@@ -120,7 +120,7 @@ jobs:
 ## 🔗 Links
 
 - [Releases](https://github.com/GuyMicciche/SyncToAzureDevOps/releases)
-- [Azure DevOps PAT Guide]([https://dev.azure.com](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate))
+- [Azure DevOps PAT Guide]([https://dev.azure.com](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate)
 
 ---
 
