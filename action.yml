@@ -73,7 +73,6 @@ runs:
       shell: bash
       env:
         AZURE_DEVOPS_PAT: ${{ inputs.pat }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: |
         ORG_URL="https://${{ inputs.organization }}"
@@ -92,7 +91,7 @@ runs:
 
         gh repo create "$GH_ORG/$REPO_NAME" --private || true
 
-        GITHUB_REMOTE="https://${GITHUB_TOKEN}@github.com/$GH_ORG/$REPO_NAME.git"
+        GITHUB_REMOTE="https://${GH_TOKEN}@github.com/$GH_ORG/$REPO_NAME.git"
         git remote add github "$GITHUB_REMOTE" || true
         git push github --mirror --force
         echo "✅ Synced $REPO_NAME from Azure DevOps to GitHub"
@@ -102,7 +101,6 @@ runs:
       shell: bash
       env:
         AZURE_DEVOPS_PAT: ${{ inputs.pat }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
         GH_TOKEN: ${{ inputs.github-token }}
       run: |
         ORG_URL="https://${{ inputs.organization }}"
@@ -137,7 +135,7 @@ runs:
             GH_REPO_NAME="${PROJECT}--${REPO_NAME}"
             gh repo create "$GH_ORG/$GH_REPO_NAME" --private || true
 
-            GITHUB_REMOTE="https://${GITHUB_TOKEN}@github.com/$GH_ORG/$GH_REPO_NAME.git"
+            GITHUB_REMOTE="https://${GH_TOKEN}@github.com/$GH_ORG/$GH_REPO_NAME.git"
             git remote add github "$GITHUB_REMOTE" || true
             git push github --mirror --force
 
