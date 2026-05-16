@@ -29,7 +29,7 @@ Bidirectional sync between GitHub and Azure DevOps — mirror a single repo or y
     pat: ${{ secrets.AZURE_DEVOPS_PAT }}
     direction: "azure-to-github"
     sync-mode: "org-wide"
-    github-token: ${{ secrets.GITHUB_TOKEN }}
+    github-token: ${{ secrets.GH_BACKUP_TOKEN }}
     github-org: "your-backup-github-org"
 ```
 
@@ -100,7 +100,7 @@ Value: [your Azure DevOps PAT]
 For Azure to GitHub sync, add a second secret:
 
 ```
-Name:  GITHUB_TOKEN
+Name:  GH_BACKUP_TOKEN
 Value: [GitHub personal access token with repo scope]
 ```
 
@@ -158,7 +158,7 @@ jobs:
           pat: ${{ secrets.AZURE_DEVOPS_PAT }}
           direction: "azure-to-github"
           sync-mode: "org-wide"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_BACKUP_TOKEN }}
           github-org: "your-backup-github-org"
 ```
 
