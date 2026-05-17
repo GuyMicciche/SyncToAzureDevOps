@@ -1,7 +1,7 @@
 # Bidirectional Sync GitHub to Azure DevOps
 
 ![GitHub Release](https://img.shields.io/github/v/release/GuyMicciche/SyncToAzureDevOps?style=for-the-badge)
-[![Tests](https://github.com/GuyMicciche/SyncToAzureDevOps/workflows/Tests/badge.svg)](https://github.com/GuyMicciche/SyncToAzureDevOps/actions/workflows/ci.yml)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/GuyMicciche/SyncToAzureDevOps/main.yml?style=for-the-badge)
 
 Bidirectional sync between GitHub and Azure DevOps — mirror a single repo or your entire organization, in either direction, on any trigger. Creates projects and repos automatically.
 
